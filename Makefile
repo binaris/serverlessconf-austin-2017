@@ -1,21 +1,46 @@
+TARGETS := build/zipper.zip build/lambda_quine_py.zip build/lambda_quine_js.zip build/replicator_js.zip
 
+TERRAFORM := plan apply destroy output show
 
-TARGETS := zipper.zip quine_js.zip
+.PHONY: build clean plan apply destroy test $(TERRAFORM)
 
-.PHONY: all
-
-all: $(TARGETS)
-
-.PHONY: clean
+build: $(TARGETS)
 
 clean:
-	rm $(TARGETS)
+	rm -rf build/*
 
-%.zip : %/
-	cd $< && zip -r ../$@ index.js node_modules/
+distclean: clean
+	rm -rf node_modules src/zipper/node_modules
 
-#quine_js.zip: quine_js
-#	cd quine_js && zip -r ../quine_js.zip index.js
+build/zipper.zip: src/zipper/index.js src/zipper/node_modules
+	cd src/zipper && zip -r ../../$@ index.js node_modules/
 
-#zipper.zip: zipper
-#	cd zipper && zip -r ../zipper.zip index.js node_modules/
+build/%_py.zip: src/%.py
+	mkdir -p $@.temp
+	cp $< $@.temp/lambda_function.py
+	cd $@.temp && zip -r ../../$@ lambda_function.py
+	rm -rf $@.temp
+
+build/%_js.zip: src/%.js
+	mkdir -p $@.temp
+	cp $< $@.temp/index.js
+	cd $@.temp && zip -r ../../$@ index.js
+	rm -rf $@.temp
+
+src/zipper/node_modules:
+	cd src/zipper && npm install
+
+$(TERRAFORM) : build
+	$(MAKE) -C tf $@
+
+test:
+	$(MAKE) -C test
+
+lint: node_modules/.bin/eslint
+	node_modules/.bin/eslint $(shell find src/ -type f -name '*.js' -maxdepth 2)
+
+pep8:	
+	pep8 $(shell find src/ -type f -name '*.py')
+
+node_modules/.bin/eslint:
+	npm install eslint eslint-plugin-import eslint-config-airbnb-base
