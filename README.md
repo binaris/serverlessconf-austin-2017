@@ -1,12 +1,12 @@
-# Binaris quine collection
+# Binaris Quine Collection
 #### **This is a simple collection of quines accompanying a lecture given at [Serverlessconf Austin 2017](https://austin.serverlessconf.io/)**
 
 A [quine](https://en.wikipedia.org/wiki/Quine_(computing)) is a non-empty computer program which takes no input and produces a copy of its own source code as its only output
 
-Requirements
+## Requirements
 * AWS account
-* terrafrom cli
-* aws cli
+* [Terrafrom CLI](https://www.terraform.io/intro/getting-started/install.html)
+* [AWS CLI](https://aws.amazon.com/cli/)
 
 `make` will generate the necessary lambda zip files
 
